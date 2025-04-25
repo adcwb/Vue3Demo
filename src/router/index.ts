@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import {message} from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import Callback from "@/views/login/Callback.vue";
 import LayoutVue from "@/views/base/Layout.vue";
 
@@ -8,7 +8,7 @@ import LayoutVue from "@/views/base/Layout.vue";
 const routes: RouteRecordRaw[] = [
     {
         path: '/',
-        redirect: '/dashboard'
+        redirect: '/login'
     },
     {
         path: '/login',
@@ -24,21 +24,26 @@ const routes: RouteRecordRaw[] = [
         name: 'Callback',
         component: Callback
     },
-
     {
-        path: '/base',
+        path: '/navbar',
         name: 'Layout',
-        component: LayoutVue
-    },
-
-    {
-        path: '/dashboard',
-        name: 'Dashboard',
-        component: () => import('@/views/dashboard/index.vue'),
-        meta: {
-            title: '仪表盘',
-            requiresAuth: true
-        }
+        component: LayoutVue,
+        children: [
+            {
+                path: '/dashboard',
+                component: () => import('@/views/dashboard/index.vue'),
+                meta: {
+                    title: '仪表盘',
+                    requiresAuth: true,
+                    menu: {
+                        key: 'dashboard',
+                        icon: 'PieChartOutlined',
+                        label: '仪表盘'
+                    }
+                }
+            },
+            // 其他动态路由将在这里添加
+        ]
     },
     {
         path: '/:pathMatch(.*)*',
@@ -56,13 +61,33 @@ const router = createRouter({
     routes
 })
 
+// 动态添加路由的函数
+export function addDynamicRoutes(menuList: any[]) {
+    menuList.forEach(menu => {
+        router.addRoute('Layout', {
+            path: menu.path,
+            component: () => import(`@/views${menu.component}.vue`),
+            meta: {
+                title: menu.title,
+                requiresAuth: true,
+                menu: {
+                    key: menu.key,
+                    icon: menu.icon,
+                    label: menu.label
+                }
+            }
+        })
+    })
+}
+
+
 // 路由守卫
 router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore()
 
     // 设置页面标题
     if (to.meta.title) {
-        document.title = `${to.meta.title} - 项目名称`
+        document.title = `${to.meta.title} - Vue3 Admin` // 设置页面标题
     }
 
     // 不需要认证的页面直接放行

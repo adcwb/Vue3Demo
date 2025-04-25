@@ -98,7 +98,7 @@ const handleCallback = async () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       // 使用replace而不是push避免回退到登录页
-      router.replace('/dashboard')
+      router.replace('/navbar')
           .then(() => message.success('跳转成功'))
           .catch(err => {
             message.error('跳转失败:', err);
